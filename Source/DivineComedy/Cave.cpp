@@ -9,13 +9,12 @@ ACave::ACave(){
 	PrimaryActorTick.bCanEverTick = true;
   distribution = new std::uniform_real_distribution<float> (0, 1);
 }
-void ACave::OnConstruction (const FTransform & Transform) {
+
+void ACave::BeginPlay(){
+	Super::BeginPlay(); 
   Clear ();
   Generate ();
   Build ();
-}
-void ACave::BeginPlay(){
-	Super::BeginPlay(); 
 }
 void ACave::Tick( float DeltaTime ){
 	Super::Tick( DeltaTime );
@@ -66,7 +65,7 @@ void ACave::Build () {
             GetWorld (),
             AtomicBlock,
             position + FVector (i, j, k)*BlockSize,
-            FRotator (), true, NULL, NULL
+            FRotator (), false, NULL, NULL
             );
           cubes.Add (temp);
         }

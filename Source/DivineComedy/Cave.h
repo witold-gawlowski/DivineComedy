@@ -44,7 +44,6 @@ class DIVINECOMEDY_API ACave : public AActor
 public:	
 	ACave();
 	virtual void BeginPlay() override;
-  virtual void OnConstruction (const FTransform & Transform) override;
 	virtual void Tick( float DeltaSeconds ) override;
   float Random (int x, int y, int z);
   int& GridAt (int x, int y, int z);
