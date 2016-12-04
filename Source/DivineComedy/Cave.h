@@ -16,7 +16,7 @@ class DIVINECOMEDY_API ACave : public AActor
 
   //Number of blocks in X dir. 
   UPROPERTY (EditAnywhere)
-  int WidthX;
+  int NumBlocsX;
   //Number of blocks in Y dir. 
   UPROPERTY (EditAnywhere)
   int WidthY;
@@ -25,7 +25,7 @@ class DIVINECOMEDY_API ACave : public AActor
   int GLength;
   //Atomic block size.
   UPROPERTY (EditAnywhere)
-    float BlockSize;
+  float BlockSize;
   //Initial density parameter (0 = no blocks at all, 1 = only blocks, no space)
   UPROPERTY (EditAnywhere)
   float density;
