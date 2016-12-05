@@ -26,14 +26,14 @@ void ACave::SeedRandom () {
 
 //This function assigns same random float from (0, 1) to each triple (x, y, z)
 float ACave::Random (int x, int y, int z) {
-  generator.seed (seed + x+y*NumBlocsX+z*NumBlocsX*WidthY);
+  generator.seed (seed + x+y*NumBlocsX+z*NumBlocsX*NumBlocsY);
   return (*distribution) (generator);
 }
 int& ACave::GridAt (int x, int y, int z) {
   check (x < NumBlocsX)
-    check (y < WidthY)
-    check (z < GLength)
-  return grid[x+y*NumBlocsX+z*NumBlocsX*WidthY];
+    check (y < NumBlocsY)
+    check (z < NumBlocsZGen)
+  return grid[x+y*NumBlocsX+z*NumBlocsX*NumBlocsY];
 }
 
 void ACave::Clear () {
@@ -46,23 +46,23 @@ void ACave::Clear () {
 
 void ACave::Generate () {
   for ( int i = 0; i < NumBlocsX; i++ ) 
-    for ( int j = 0; j < WidthY; j++ ) 
-      for ( int k = 0; k < GLength; k++ ) {
+    for ( int j = 0; j < NumBlocsY; j++ ) 
+      for ( int k = 0; k < NumBlocsZGen; k++ ) {
         grid.Add (Random (i, j, k) <= density ? 1 : 0);
       }
 }
 
 void ACave::Build () {
-  FVector position = GetTransform ().GetLocation ()-FVector(NumBlocsX*BlockSize, WidthY*BlockSize, 0)/2.0f;
+  FVector position = GetTransform ().GetLocation ()-FVector(NumBlocsX*BlockDistance, NumBlocsY*BlockDistance, 0)/2.0f;
   for ( int i = 0; i < NumBlocsX; i++ ) 
-    for ( int j = 0; j < WidthY; j++ ) 
-      for ( int k = 0; k < GLength; k++ ){
+    for ( int j = 0; j < NumBlocsY; j++ ) 
+      for ( int k = 0; k < NumBlocsZGen; k++ ){
         if ( GridAt (i, j, k) ) {
           print (TEXT ("%d"), GridAt (i, j, k))
           AActor *temp = DivineUtils::SpawnBP<AActor> (
             GetWorld (),
             AtomicBlock,
-            position + FVector (i, j, - k - 1) * BlockSize,
+            position + FVector (i, j, - k - 1) * BlockDistance,
             FRotator (0, 0, 0), false, this, NULL
             );
           //temp->AttachRootComponentToActor (this);
