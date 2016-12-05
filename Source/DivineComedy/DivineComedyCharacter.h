@@ -74,6 +74,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	uint32 bUsingMotionControllers : 1;
 
+  UFUNCTION (BlueprintNativeEvent)
+    void EventOnFire ();
+
 protected:
 	
 	/** Fires a projectile. */

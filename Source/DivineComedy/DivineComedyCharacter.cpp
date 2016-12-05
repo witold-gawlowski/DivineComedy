@@ -10,6 +10,8 @@
 
 DEFINE_LOG_CATEGORY_STATIC(LogFPChar, Warning, All);
 
+
+
 //////////////////////////////////////////////////////////////////////////
 // ADivineComedyCharacter
 
@@ -80,6 +82,9 @@ ADivineComedyCharacter::ADivineComedyCharacter()
 	//bUsingMotionControllers = true;
 }
 
+void ADivineComedyCharacter::EventOnFire_Implementation () {
+
+}
 void ADivineComedyCharacter::BeginPlay()
 {
 	// Call the base class  
@@ -160,6 +165,7 @@ void ADivineComedyCharacter::OnFire()
 				World->SpawnActor<ADivineComedyProjectile>(ProjectileClass, SpawnLocation, SpawnRotation, ActorSpawnParams);
 			}
 		}
+    EventOnFire ();
 	}
 
 	// try and play the sound if specified
