@@ -65,7 +65,13 @@ void ACave::Build () {
             position + FVector (i, j, - k - 1) * BlockDistance,
             FRotator (0, 0, 0), false, this, NULL
             );
-          //temp->AttachRootComponentToActor (this);
+          FAttachmentTransformRules rules (
+            EAttachmentRule::KeepRelative,
+            EAttachmentRule::KeepRelative, 
+            EAttachmentRule::KeepRelative,
+            true
+          );
+          temp->AttachToActor (this, rules);
           cubes.Add (temp);
         }
       }
