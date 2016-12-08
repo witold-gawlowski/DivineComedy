@@ -11,46 +11,93 @@
 UCLASS()
 class DIVINECOMEDY_API ACave : public AActor
 {
-  //Class responsible for cave generation.
-  GENERATED_BODY ()
+     //Class responsible for cave generation.
+     GENERATED_BODY()
 
-  //Number of blocks in X dir. 
-  UPROPERTY (EditAnywhere)
-  int NumBlocsX;
-  //Number of blocks in Y dir. 
-  UPROPERTY (EditAnywhere)
-  int NumBlocsY;
-  //Number of generated blocks in Z dir.
-  UPROPERTY (EditAnywhere)
-  int NumBlocsZGen;
-  //Atomic block size.
-  UPROPERTY (EditAnywhere)
-  float BlockDistance;
-  //Initial density parameter (0 = no blocks at all, 1 = only blocks, no space)
-  UPROPERTY (EditAnywhere)
-  float density;
-  //Atomic block blueprint.
-  UPROPERTY (EditAnywhere)
-  UClass *AtomicBlock;
+     //Number of blocks in X dir. 
+     UPROPERTY(EditAnywhere, Category = Size)
+          int NumBlocsX = 10;
+     //Number of blocks in Y dir. 
+     UPROPERTY(EditAnywhere, Category = Size)
+          int NumBlocsY = 10;
+     //Number of generated blocks in Z dir.
+     UPROPERTY(EditAnywhere, Category = Size)
+          int NumBlocsZGen = 10;     
+     //Total number of blocks
+     UPROPERTY(VisibleAnywhere, Category = Size)
+          int TotalSize;
+     
+     //Initial density parameter (0 = no blocks at all, 1 = only blocks, no space)
+     UPROPERTY(EditAnywhere, Category = Generation)
+          float Density = 0.4f;
 
-  TArray<int> grid;
-  TArray<AActor*> cubes;
-  //Global seed value, constant for an execution. 
-  static int seed;
-  
-  std::mt19937 generator;
-  std::uniform_real_distribution<float> *distribution;
-  void SeedRandom ();
-public:	
-	ACave();
-	virtual void BeginPlay() override;
-	virtual void Tick( float DeltaSeconds ) override;
-  float Random (int x, int y, int z);
-  int& GridAt (int x, int y, int z);
+     UPROPERTY(EditAnywhere, Category = Generation)
+          int NumberOfSteps = 10;
 
-  void Generate ();
-  void Build ();
-  void Clear ();
-	
-	
+     UPROPERTY(EditAnywhere, Category = Generation)
+          int LowerNeighboursCountDieThreshold = 3;
+
+     UPROPERTY(EditAnywhere, Category = Generation)
+          int UpperNeighboursCountDieThreshold = 10;
+
+     UPROPERTY(EditAnywhere, Category = Generation)
+          int ResurrectionGapLowerLimit = 9;
+
+     UPROPERTY(EditAnywhere, Category = Generation)
+          int ResurrectionGapUpperLimit = 10;
+
+     //Grid size
+     UPROPERTY(EditAnywhere)
+          float BlockSize;
+
+     //Atomic block blueprint.
+     UPROPERTY(EditAnywhere)
+          UClass *AtomicBlock;
+
+     TArray<AActor*> cubes;
+     //Global seed value, constant for an execution. 
+     static int seed;
+
+     std::mt19937 generator;
+     std::uniform_real_distribution<float> *distribution;
+
+     //Generate maze
+     void Generate();
+     void Build();
+     void Clear();
+     void SeedRandom();
+
+
+#pragma region Generation algorithm
+     TArray<bool> CurrentStep;
+     TArray<bool> PreviousStep;
+
+
+     //Fill the boundaries with cubes, based on spawn probability
+     void FillModelWithCubes();
+
+protected:
+     //Step of the algorithm
+     UFUNCTION(BlueprintCallable, Category = Generation)
+     void PerformGenerationStep(bool RecreateModel);
+
+private:
+
+     int CountNeighbours(int cell_index);
+
+     bool IsAlive(int cell_index);
+
+     void Kill(int cell_index);
+
+     void Resurrect(int cell_index);
+
+#pragma endregion Generation algorithm
+
+
+public:
+     ACave();
+     virtual void BeginPlay() override;
+     virtual void Tick(float DeltaSeconds) override;
+     float Random(int x, int y, int z);
+
 };
