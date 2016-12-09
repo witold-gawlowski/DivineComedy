@@ -46,13 +46,9 @@ class DIVINECOMEDY_API ACave : public AActor
      UPROPERTY(EditAnywhere, Category = Generation)
           int ResurrectionGapUpperLimit = 10;
 
-     //Grid size
-     UPROPERTY(EditAnywhere)
-          float BlockSize;
-
      //Atomic block blueprint.
      UPROPERTY(EditAnywhere)
-          UClass *AtomicBlock;
+          TArray<UClass*> AtomicBlock;
 
      TArray<AActor*> cubes;
      //Global seed value, constant for an execution. 
@@ -72,7 +68,6 @@ class DIVINECOMEDY_API ACave : public AActor
      TArray<bool> CurrentStep;
      TArray<bool> PreviousStep;
 
-
      //Fill the boundaries with cubes, based on spawn probability
      void FillModelWithCubes();
 
@@ -80,6 +75,16 @@ protected:
      //Step of the algorithm
      UFUNCTION(BlueprintCallable, Category = Generation)
      void PerformGenerationStep(bool RecreateModel);
+     
+     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Cave)
+          FVector CaveSize3D;
+
+     //Grid size
+     UPROPERTY(EditAnywhere, BlueprintReadWrite)
+          float BlockSize;
+
+     UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+          bool GenerationComplete = false;
 
 private:
 
@@ -90,6 +95,10 @@ private:
      void Kill(int cell_index);
 
      void Resurrect(int cell_index);
+     
+     void CreateBlock(FVector location);
+
+     void CreateWalls(FVector origin);
 
 #pragma endregion Generation algorithm
 
