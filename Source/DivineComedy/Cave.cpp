@@ -119,16 +119,13 @@ void ACave::Build () {
     if ( IsAlive (i) ) {
       //print(TEXT("%d"), GridAt(x, y, z))
       if ( AtomicBlock != NULL) {
+        FVector location =  (position + FVector (x, y, -z) * BlockSize - FVector (NumBlocsX*BlockSize / 2.f, NumBlocsY*BlockSize / 2.f, 0));
         AActor *temp = DivineUtils::SpawnBP<AActor> (
           GetWorld (),
           AtomicBlock,
-          FVector (0, 0, 0),
+          location,
           FRotator (0, 0, 0), false, this, NULL
           );
-        //FVector BlSize, Origin;
-        //temp->GetActorBounds(false, Origin, BlSize);
-        temp->SetActorLocation (position + FVector (x, y, -z) * BlockSize - FVector (BlockSize / 2.f, BlockSize / 2.f, BlockSize / 2.f));
-
         FAttachmentTransformRules rules (
           EAttachmentRule::KeepRelative,
           EAttachmentRule::KeepRelative,
