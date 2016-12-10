@@ -24,6 +24,7 @@ void ACave::Tick(float DeltaTime)
      Super::Tick(DeltaTime);
 }
 
+
 #pragma region Random number generation
 //This function sets global seed value. 
 void ACave::SeedRandom()
@@ -42,9 +43,6 @@ int ACave::seed;
 #pragma endregion Random number generation
 
 
-
-
-
 #pragma region Cellular automata algorithm
 void ACave::FillModelWithCubes()
 {
@@ -56,7 +54,7 @@ void ACave::PerformGenerationStep(bool RecreateModel = false)
 {
      for (int i = 0; i < TotalSize; i++)
      {
-          int neighbours_number = CountNeighbours(i);
+          int neighbours_number = CountNeighbours(i,true);
           if (IsAlive(i))
           {
                if (neighbours_number < LowerNeighboursCountDieThreshold ||
@@ -75,7 +73,7 @@ void ACave::PerformGenerationStep(bool RecreateModel = false)
      }
 }
 
-int ACave::CountNeighbours(int cell_index)
+int ACave::CountNeighbours(int cell_index, bool count_diagonal)
 {
      int neighbours = 0,
           x = cell_index / (NumBlocsY*NumBlocsZGen),
@@ -90,8 +88,11 @@ int ACave::CountNeighbours(int cell_index)
                          for (int k = -1; k <= 1; k++)
                               if (k + z >= 0 && k + z < NumBlocsZGen)
                               {
-                                   if (PreviousStep[(i + x)*(NumBlocsY*NumBlocsZGen) + (y+j)*NumBlocsZGen + z + k])
-                                        neighbours++;
+                                   if ((!count_diagonal && (i + j + k % 2 == 1)) || count_diagonal)
+                                   {
+                                        if (PreviousStep[(i + x)*(NumBlocsY*NumBlocsZGen) + (y + j)*NumBlocsZGen + z + k])
+                                             neighbours++;
+                                   }
                               }
                               else
                                    neighbours++;
@@ -120,11 +121,12 @@ void ACave::Resurrect(int cell_index)
 }
 #pragma endregion Cellular automata algorithm
 
-void ACave::CreateBlock(FVector location)
+
+void ACave::CreateBlock(UClass *block_type, FVector location)
 {
      AActor *temp = DivineUtils::SpawnBP<AActor>(
           GetWorld(),
-          AtomicBlock[0],
+          block_type,
           location,
           FRotator(0, 0, 0), false, this, NULL
           );
@@ -171,41 +173,35 @@ void ACave::Build()
           z = i%NumBlocsZGen;
           if (IsAlive(i))
           {
-               if (AtomicBlock.Num() != 0)
+               /*int neighbours_number = CountNeighbours(i, false);
+               UClass *block_type = NULL;
+               switch (neighbours_number)
                {
-                    CreateBlock(position + FVector(x, y, -z) * BlockSize);
+               case 1:
+                    block_type = OneSided;
+                    break;
+               case 2:
+                    block_type = TwoSided_Together;
+                    break;
+               case 3:
+                    block_type = ThreeSided_AllConnected;
+                    break;
+               case 4:
+                    block_type = FourSided_Together;
+                    break;
+               case 5:
+                    block_type = FiveSided;
+                    break;
+               case 6:
+                    block_type = SixSided;
+                    break;
+
                }
+               if (block_type != NULL)*/
+                    CreateBlock(SixSided, position + FVector(x, y, -z) * BlockSize);
           }
      }
 
      CaveSize3D = FVector(BlockSize*NumBlocsX, BlockSize*NumBlocsY, BlockSize*NumBlocsZGen);
      GenerationComplete = true;
-}
-
-
-void ACave::CreateWalls(FVector origin)
-{
-     //X - walls
-     for (int i = 0; i < NumBlocsY; i++)
-          for (int j = 0; j < NumBlocsZGen; j++)
-          {
-               CreateBlock(origin + FVector(-1, i, j)*BlockSize);
-               CreateBlock(origin + FVector(NumBlocsX, i, j)*BlockSize);
-          }
-
-     //Y - walls
-     for (int i = 0; i < NumBlocsX; i++)
-          for (int j = 0; j < NumBlocsZGen; j++)
-          {
-               CreateBlock(origin + FVector(i, -1, j)*BlockSize);
-               CreateBlock(origin + FVector(i, NumBlocsY, j)*BlockSize);
-          }
-
-     //X - walls
-     for (int i = 0; i < NumBlocsX; i++)
-          for (int j = 0; j < NumBlocsY; j++)
-          {
-               CreateBlock(origin + FVector(i, j, -1)*BlockSize);
-               CreateBlock(origin + FVector(i, j, NumBlocsZGen)*BlockSize);
-          }
 }

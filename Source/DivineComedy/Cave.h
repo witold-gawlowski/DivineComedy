@@ -46,9 +46,36 @@ class DIVINECOMEDY_API ACave : public AActor
      UPROPERTY(EditAnywhere, Category = Generation)
           int ResurrectionGapUpperLimit = 10;
 
+     UPROPERTY(EditAnywhere, Category = AtomicAssets)
+          UClass * OneSided;
+
+     UPROPERTY(EditAnywhere, Category = AtomicAssets)
+          UClass * TwoSided_Separate;
+
+     UPROPERTY(EditAnywhere, Category = AtomicAssets)
+          UClass * TwoSided_Together;
+
+     UPROPERTY(EditAnywhere, Category = AtomicAssets)
+          UClass * ThreeSided_AllConnected;
+
+     UPROPERTY(EditAnywhere, Category = AtomicAssets)
+          UClass * ThreeSided_Packman;
+
+     UPROPERTY(EditAnywhere, Category = AtomicAssets)
+          UClass * FourSided_Separate;
+
+     UPROPERTY(EditAnywhere, Category = AtomicAssets)
+          UClass * FourSided_Together;
+
+     UPROPERTY(EditAnywhere, Category = AtomicAssets)
+          UClass * FiveSided;
+
+     UPROPERTY(EditAnywhere, Category = AtomicAssets)
+          UClass * SixSided;
+
      //Atomic block blueprint.
-     UPROPERTY(EditAnywhere)
-          TArray<UClass*> AtomicBlock;
+     //UPROPERTY(EditAnywhere)
+     //     TArray<UClass*> AtomicBlock;
 
      TArray<AActor*> cubes;
      //Global seed value, constant for an execution. 
@@ -88,7 +115,7 @@ protected:
 
 private:
 
-     int CountNeighbours(int cell_index);
+     int CountNeighbours(int cell_index, bool count_neighbours);
 
      bool IsAlive(int cell_index);
 
@@ -96,9 +123,7 @@ private:
 
      void Resurrect(int cell_index);
      
-     void CreateBlock(FVector location);
-
-     void CreateWalls(FVector origin);
+     void CreateBlock(UClass *block_type, FVector location);
 
 #pragma endregion Generation algorithm
 
