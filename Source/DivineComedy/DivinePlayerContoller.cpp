@@ -4,7 +4,3 @@
 #include "DivinePlayerContoller.h"
 
 
-
-void ADivinePlayerContoller::UpdateRotation (float DeltaTime) {
-
-}

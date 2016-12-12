@@ -12,8 +12,6 @@ UCLASS()
 class DIVINECOMEDY_API ADivinePlayerContoller : public APlayerController
 {
   GENERATED_BODY ()
-    void UpdateRotation (float DeltaTime) override;
-	
 	
 	
 };
