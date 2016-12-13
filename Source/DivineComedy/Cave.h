@@ -16,13 +16,13 @@ class DIVINECOMEDY_API ACave : public AActor
 protected:
      //Number of blocks in X dir. 
      UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Size)
-          int NumBlocsX = 10;
+          int NumBlocsX;
      //Number of blocks in Y dir. 
      UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Size)
-          int NumBlocsY = 10;
+          int NumBlocsY;
      //Number of generated blocks in Z dir.
      UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Size)
-          int NumBlocsZGen = 10;     
+          int NumBlocsZGen;
 private:
      //Total number of blocks
      UPROPERTY(VisibleAnywhere, Category = Size)
