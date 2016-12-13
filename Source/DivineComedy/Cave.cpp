@@ -91,6 +91,7 @@ int ACave::CountNeighbours(int cell_index, bool count_diagonal)
                     {
                          for (int k = -1; k <= 1; k++)
                          {
+                              //exclude center
                               if (i != j || j != k || i != k)
                               {
                                    if (k + z >= 0 && k + z < NumBlocsZGen)
