@@ -13,16 +13,17 @@ class DIVINECOMEDY_API ACave : public AActor
 {
      //Class responsible for cave generation.
      GENERATED_BODY()
-
+protected:
      //Number of blocks in X dir. 
-     UPROPERTY(EditAnywhere, Category = Size)
+     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Size)
           int NumBlocsX = 10;
      //Number of blocks in Y dir. 
-     UPROPERTY(EditAnywhere, Category = Size)
+     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Size)
           int NumBlocsY = 10;
      //Number of generated blocks in Z dir.
-     UPROPERTY(EditAnywhere, Category = Size)
+     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Size)
           int NumBlocsZGen = 10;     
+private:
      //Total number of blocks
      UPROPERTY(VisibleAnywhere, Category = Size)
           int TotalSize;
@@ -32,46 +33,13 @@ class DIVINECOMEDY_API ACave : public AActor
           float Density = 0.4f;
 
      UPROPERTY(EditAnywhere, Category = Generation)
-          int NumberOfSteps = 10;
+          int NumberOfSteps = 25;
 
      UPROPERTY(EditAnywhere, Category = Generation)
-          int LowerNeighboursCountDieThreshold = 3;
+          int DiesIfHasLowerNumberOfNeighboursThan = 9;
 
      UPROPERTY(EditAnywhere, Category = Generation)
-          int UpperNeighboursCountDieThreshold = 10;
-
-     UPROPERTY(EditAnywhere, Category = Generation)
-          int ResurrectionGapLowerLimit = 9;
-
-     UPROPERTY(EditAnywhere, Category = Generation)
-          int ResurrectionGapUpperLimit = 10;
-
-     UPROPERTY(EditAnywhere, Category = AtomicAssets)
-          UClass * OneSided;
-
-     UPROPERTY(EditAnywhere, Category = AtomicAssets)
-          UClass * TwoSided_Separate;
-
-     UPROPERTY(EditAnywhere, Category = AtomicAssets)
-          UClass * TwoSided_Together;
-
-     UPROPERTY(EditAnywhere, Category = AtomicAssets)
-          UClass * ThreeSided_AllConnected;
-
-     UPROPERTY(EditAnywhere, Category = AtomicAssets)
-          UClass * ThreeSided_Packman;
-
-     UPROPERTY(EditAnywhere, Category = AtomicAssets)
-          UClass * FourSided_Separate;
-
-     UPROPERTY(EditAnywhere, Category = AtomicAssets)
-          UClass * FourSided_Together;
-
-     UPROPERTY(EditAnywhere, Category = AtomicAssets)
-          UClass * FiveSided;
-
-     UPROPERTY(EditAnywhere, Category = AtomicAssets)
-          UClass * SixSided;
+          int ResurrectsIfHasHigherNumberOfNeighboursThan = 12;
 
      //Atomic block blueprint.
      //UPROPERTY(EditAnywhere)
@@ -92,8 +60,8 @@ class DIVINECOMEDY_API ACave : public AActor
 
 
 #pragma region Generation algorithm
-     TArray<bool> CurrentStep;
-     TArray<bool> PreviousStep;
+     TArray<unsigned short> CurrentStep;
+     TArray<unsigned short> PreviousStep;
 
      //Fill the boundaries with cubes, based on spawn probability
      void FillModelWithCubes();
@@ -101,17 +69,13 @@ class DIVINECOMEDY_API ACave : public AActor
 protected:
      //Step of the algorithm
      UFUNCTION(BlueprintCallable, Category = Generation)
-     void PerformGenerationStep(bool RecreateModel);
-     
-     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Cave)
-          FVector CaveSize3D;
+     void PerformGenerationStep();
 
-     //Grid size
-     UPROPERTY(EditAnywhere, BlueprintReadWrite)
-          float BlockSize;
+     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Cave)
+          TArray<bool> CaveArray;
 
-     UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-          bool GenerationComplete = false;
+     UFUNCTION(BlueprintCallable, Category = Cave)
+          void GenerateCave();
 
 private:
 
@@ -123,7 +87,7 @@ private:
 
      void Resurrect(int cell_index);
      
-     void CreateBlock(UClass *block_type, FVector location);
+     //void CreateBlock(UClass *block_type, FVector location, int n_n);
 
 #pragma endregion Generation algorithm
 

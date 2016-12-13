@@ -1,9 +1,10 @@
 #include "DivineComedy.h"
 #include "Cave.h"
 #include <time.h>
+#include <EngineGlobals.h>
+#include <Runtime/Engine/Classes/Engine/Engine.h>
 
-#define print1(XXX) UE_LOG (LogTemp, Warning, XXX);
-#define print(XXX, YYY)  UE_LOG (LogTemp, Warning, XXX, YYY);
+#define print(text) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 10, FColor::White,text)
 
 ACave::ACave()
 {
@@ -14,9 +15,8 @@ ACave::ACave()
 void ACave::BeginPlay()
 {
      Super::BeginPlay();
-     Clear();
-     Generate();
-     Build();
+     GenerateCave();
+     //Build();
 }
 
 void ACave::Tick(float DeltaTime)
@@ -47,38 +47,42 @@ int ACave::seed;
 void ACave::FillModelWithCubes()
 {
      for (int i = 0; i < TotalSize; i++)
-          PreviousStep.Add(Random(i / (NumBlocsY*NumBlocsZGen), i / NumBlocsZGen, i%NumBlocsZGen) <= Density ? true : false);
+          PreviousStep.Add(Random(i / (NumBlocsY*NumBlocsZGen), i / NumBlocsZGen, i%NumBlocsZGen) <= Density ? 26 : 0);
 }
 
-void ACave::PerformGenerationStep(bool RecreateModel = false)
+void ACave::PerformGenerationStep()
 {
+
+     //int ResurrectionsNumber = 0;
      for (int i = 0; i < TotalSize; i++)
      {
           int neighbours_number = CountNeighbours(i,true);
           if (IsAlive(i))
           {
-               if (neighbours_number < LowerNeighboursCountDieThreshold ||
-                    neighbours_number > UpperNeighboursCountDieThreshold)
+               if (neighbours_number < DiesIfHasLowerNumberOfNeighboursThan)
                     Kill(i);
           }
-          else if (neighbours_number >= ResurrectionGapLowerLimit && neighbours_number <= ResurrectionGapUpperLimit)
+          else if (neighbours_number > ResurrectsIfHasHigherNumberOfNeighboursThan)
+          {
                Resurrect(i);
+          }
      }
+}
 
-     //recreate model if from blueprint called
-     if (RecreateModel)
-     {
-          Clear();
-          Build();
-     }
+void ACave::GenerateCave()
+{
+     Clear();
+     Generate();
 }
 
 int ACave::CountNeighbours(int cell_index, bool count_diagonal)
 {
-     int neighbours = 0,
+     int diagonal_neighbours = 0,
+          parallel_neighbours = 0,
           x = cell_index / (NumBlocsY*NumBlocsZGen),
           y = cell_index / NumBlocsZGen % NumBlocsY,
           z = cell_index%NumBlocsZGen;
+
      for (int i = -1; i <= 1; i++)
           if (i + x >= 0 && i + x < NumBlocsX)
           {
@@ -86,122 +90,164 @@ int ACave::CountNeighbours(int cell_index, bool count_diagonal)
                     if (j + y >= 0 && j + y < NumBlocsY)
                     {
                          for (int k = -1; k <= 1; k++)
-                              if (k + z >= 0 && k + z < NumBlocsZGen)
+                         {
+                              if (i != j || j != k || i != k)
                               {
-                                   if ((!count_diagonal && (i + j + k % 2 == 1)) || count_diagonal)
+                                   if (k + z >= 0 && k + z < NumBlocsZGen)
                                    {
-                                        if (PreviousStep[(i + x)*(NumBlocsY*NumBlocsZGen) + (y + j)*NumBlocsZGen + z + k])
-                                             neighbours++;
+                                        if (IsAlive((i + x)*(NumBlocsY*NumBlocsZGen) + (y + j)*NumBlocsZGen + z + k))
+                                        {
+                                             if ((i + j + k) % 2 == 1)
+                                                  diagonal_neighbours++;
+                                             else
+                                                  parallel_neighbours++;
+                                        }
+                                   }
+                                   else
+                                   {
+                                        if ((i + j) % 2 == 1)
+                                             diagonal_neighbours++;
+                                        else
+                                             parallel_neighbours++;
                                    }
                               }
-                              else
-                                   neighbours++;
+                         }
                     }
                     else
-                         neighbours++;
+                    {
+                         diagonal_neighbours += 2;
+                         parallel_neighbours++;
+                    }
           }
           else
-               neighbours++;
-     return neighbours;
+          {
+               diagonal_neighbours += 8;
+               parallel_neighbours++;
+          }
+
+     //Improvements
+     //if (parallel_neighbours > 1 && diagonal_neighbours > 7)||(parallel_neighbours > 3)
+     //     return 26;
+     
+     if (count_diagonal)
+          return (diagonal_neighbours + parallel_neighbours);
+     else
+          return parallel_neighbours;
 }
 
 bool ACave::IsAlive(int cell_index)
 {
-     return PreviousStep[cell_index];
+     if (PreviousStep[cell_index] != 0)
+          return true;
+     else
+          return false;
 }
 
 void ACave::Kill(int cell_index)
 {
-     CurrentStep[cell_index] = false;
+     CurrentStep[cell_index] = 0;
 }
 
 void ACave::Resurrect(int cell_index)
 {
-     CurrentStep[cell_index] = true;
+     CurrentStep[cell_index] = 26;// CountNeighbours(cell_index, true);
 }
 #pragma endregion Cellular automata algorithm
 
-
-void ACave::CreateBlock(UClass *block_type, FVector location)
-{
-     AActor *temp = DivineUtils::SpawnBP<AActor>(
-          GetWorld(),
-          block_type,
-          location,
-          FRotator(0, 0, 0), false, this, NULL
-          );
-     FAttachmentTransformRules rules(
-          EAttachmentRule::KeepRelative,
-          EAttachmentRule::KeepRelative,
-          EAttachmentRule::KeepRelative,
-          true
-          );
-     temp->AttachToActor(this, rules);
-     cubes.Add(temp);
-}
+//
+//void ACave::CreateBlock(UClass *block_type, FVector location, int n_n)
+//{
+//     AActor *temp = DivineUtils::SpawnBP<AActor>(
+//          GetWorld(),
+//          block_type,
+//          location,
+//          FRotator(0, 0, 0), false, this, NULL
+//          );
+//
+//     temp->SetActorScale3D(FVector(BlocksScale, BlocksScale, BlocksScale));
+//
+//     FAttachmentTransformRules rules(
+//          EAttachmentRule::KeepRelative,
+//          EAttachmentRule::KeepRelative,
+//          EAttachmentRule::KeepRelative,
+//          true
+//          );
+//     temp->AttachToActor(this, rules);
+//     cubes.Add(temp);
+//}
 
 void ACave::Generate()
 {
      TotalSize = NumBlocsX*NumBlocsY*NumBlocsZGen;
      FillModelWithCubes();
      CurrentStep = PreviousStep;
+
      for (int i = 0; i < NumberOfSteps; i++)
+     {
           PerformGenerationStep();
-     PreviousStep = CurrentStep;
+          PreviousStep = CurrentStep;
+     }
+
+     for (int i = 0; i < TotalSize; i++)
+     {
+          CaveArray.Add(IsAlive(i));
+     }
 }
 
 void ACave::Clear()
 {
-     for (AActor *a : cubes)
-     {
-          if (a && !a->IsPendingKillPending())
-               a->Destroy();
-     }
+     CaveArray.Empty();
+     //for (AActor *a : cubes)
+     //{
+     //     if (a && !a->IsPendingKillPending())
+     //          a->Destroy();
+     //}
      PreviousStep.Empty();
      CurrentStep.Empty();
 }
-
-void ACave::Build()
-{
-     FVector position = GetTransform().GetLocation() - FVector(NumBlocsX*BlockSize, NumBlocsY*BlockSize, 0) / 2.0f;
-     //position = FVector(0, 0, 0);
-     int x, y, z;
-     for (int i = 0; i < PreviousStep.Num(); i++)
-     {
-          x = i / (NumBlocsY*NumBlocsZGen);
-          y = i / NumBlocsZGen % NumBlocsY;
-          z = i%NumBlocsZGen;
-          if (IsAlive(i))
-          {
-               /*int neighbours_number = CountNeighbours(i, false);
-               UClass *block_type = NULL;
-               switch (neighbours_number)
-               {
-               case 1:
-                    block_type = OneSided;
-                    break;
-               case 2:
-                    block_type = TwoSided_Together;
-                    break;
-               case 3:
-                    block_type = ThreeSided_AllConnected;
-                    break;
-               case 4:
-                    block_type = FourSided_Together;
-                    break;
-               case 5:
-                    block_type = FiveSided;
-                    break;
-               case 6:
-                    block_type = SixSided;
-                    break;
-
-               }
-               if (block_type != NULL)*/
-                    CreateBlock(SixSided, position + FVector(x, y, -z) * BlockSize);
-          }
-     }
-
-     CaveSize3D = FVector(BlockSize*NumBlocsX, BlockSize*NumBlocsY, BlockSize*NumBlocsZGen);
-     GenerationComplete = true;
-}
+//
+//void ACave::Build()
+//{
+//     FVector position = GetTransform().GetLocation() - FVector(NumBlocsX*BlockSize, NumBlocsY*BlockSize, 0) / 2.0f;
+//
+//     //position = FVector(0, 0, 0);
+//     int x, y, z;
+//     for (int i = 0; i < PreviousStep.Num(); i++)
+//     {
+//          x = i / (NumBlocsY*NumBlocsZGen);
+//          y = i / NumBlocsZGen % NumBlocsY;
+//          z = i%NumBlocsZGen;
+//          if (IsAlive(i))
+//          {
+//               /*int neighbours_number = CountNeighbours(i, false);
+//               UClass *block_type = NULL;
+//               switch (neighbours_number)
+//               {
+//               case 1:
+//                    block_type = OneSided;
+//                    break;
+//               case 2:
+//                    block_type = TwoSided_Together;
+//                    break;
+//               case 3:
+//                    block_type = ThreeSided_AllConnected;
+//                    break;
+//               case 4:
+//                    block_type = FourSided_Together;
+//                    break;
+//               case 5:
+//                    block_type = FiveSided;
+//                    break;
+//               case 6:
+//                    block_type = SixSided;
+//                    break;
+//
+//               }
+//               if (block_type != NULL)*/
+//               CreateBlock(SixSided, position + FVector(x, y, -z) * BlockSize, PreviousStep[i]);
+//          }
+//     }
+//
+//     CaveSize3D = BlockSize*BlocksScale*FVector(NumBlocsX, NumBlocsY, NumBlocsZGen);
+//
+//}
