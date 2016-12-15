@@ -16,7 +16,6 @@ void ACave::BeginPlay()
 {
      Super::BeginPlay();
      GenerateCave();
-     //Build();
 }
 
 void ACave::Tick(float DeltaTime)
@@ -52,8 +51,6 @@ void ACave::FillModelWithCubes()
 
 void ACave::PerformGenerationStep()
 {
-
-     //int ResurrectionsNumber = 0;
      for (int i = 0; i < TotalSize; i++)
      {
           int neighbours_number = CountNeighbours(i,true);
@@ -67,12 +64,6 @@ void ACave::PerformGenerationStep()
                Resurrect(i);
           }
      }
-}
-
-void ACave::GenerateCave()
-{
-     Clear();
-     Generate();
 }
 
 int ACave::CountNeighbours(int cell_index, bool count_diagonal)
@@ -125,10 +116,6 @@ int ACave::CountNeighbours(int cell_index, bool count_diagonal)
                diagonal_neighbours += 8;
                parallel_neighbours++;
           }
-
-     //Improvements
-     //if (parallel_neighbours > 1 && diagonal_neighbours > 7)||(parallel_neighbours > 3)
-     //     return 26;
      
      if (count_diagonal)
           return (diagonal_neighbours + parallel_neighbours);
@@ -151,34 +138,14 @@ void ACave::Kill(int cell_index)
 
 void ACave::Resurrect(int cell_index)
 {
-     CurrentStep[cell_index] = 26;// CountNeighbours(cell_index, true);
+     CurrentStep[cell_index] = 26;
 }
 #pragma endregion Cellular automata algorithm
 
-//
-//void ACave::CreateBlock(UClass *block_type, FVector location, int n_n)
-//{
-//     AActor *temp = DivineUtils::SpawnBP<AActor>(
-//          GetWorld(),
-//          block_type,
-//          location,
-//          FRotator(0, 0, 0), false, this, NULL
-//          );
-//
-//     temp->SetActorScale3D(FVector(BlocksScale, BlocksScale, BlocksScale));
-//
-//     FAttachmentTransformRules rules(
-//          EAttachmentRule::KeepRelative,
-//          EAttachmentRule::KeepRelative,
-//          EAttachmentRule::KeepRelative,
-//          true
-//          );
-//     temp->AttachToActor(this, rules);
-//     cubes.Add(temp);
-//}
-
-void ACave::Generate()
+void ACave::GenerateCave()
 {
+     Clear();
+
      TotalSize = NumBlocsX*NumBlocsY*NumBlocsZGen;
      FillModelWithCubes();
      CurrentStep = PreviousStep;
@@ -198,57 +165,6 @@ void ACave::Generate()
 void ACave::Clear()
 {
      CaveArray.Empty();
-     //for (AActor *a : cubes)
-     //{
-     //     if (a && !a->IsPendingKillPending())
-     //          a->Destroy();
-     //}
      PreviousStep.Empty();
      CurrentStep.Empty();
 }
-//
-//void ACave::Build()
-//{
-//     FVector position = GetTransform().GetLocation() - FVector(NumBlocsX*BlockSize, NumBlocsY*BlockSize, 0) / 2.0f;
-//
-//     //position = FVector(0, 0, 0);
-//     int x, y, z;
-//     for (int i = 0; i < PreviousStep.Num(); i++)
-//     {
-//          x = i / (NumBlocsY*NumBlocsZGen);
-//          y = i / NumBlocsZGen % NumBlocsY;
-//          z = i%NumBlocsZGen;
-//          if (IsAlive(i))
-//          {
-//               /*int neighbours_number = CountNeighbours(i, false);
-//               UClass *block_type = NULL;
-//               switch (neighbours_number)
-//               {
-//               case 1:
-//                    block_type = OneSided;
-//                    break;
-//               case 2:
-//                    block_type = TwoSided_Together;
-//                    break;
-//               case 3:
-//                    block_type = ThreeSided_AllConnected;
-//                    break;
-//               case 4:
-//                    block_type = FourSided_Together;
-//                    break;
-//               case 5:
-//                    block_type = FiveSided;
-//                    break;
-//               case 6:
-//                    block_type = SixSided;
-//                    break;
-//
-//               }
-//               if (block_type != NULL)*/
-//               CreateBlock(SixSided, position + FVector(x, y, -z) * BlockSize, PreviousStep[i]);
-//          }
-//     }
-//
-//     CaveSize3D = BlockSize*BlocksScale*FVector(NumBlocsX, NumBlocsY, NumBlocsZGen);
-//
-//}

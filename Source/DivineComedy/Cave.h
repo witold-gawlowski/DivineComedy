@@ -23,10 +23,16 @@ protected:
      //Number of generated blocks in Z dir.
      UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Size)
           int NumBlocsZGen;
-private:
-     //Total number of blocks
-     UPROPERTY(VisibleAnywhere, Category = Size)
-          int TotalSize;
+
+     //Step of the algorithm
+     UFUNCTION(BlueprintCallable, Category = Generation)
+          void PerformGenerationStep();
+
+     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Cave)
+          TArray<bool> CaveArray;
+
+     UFUNCTION(BlueprintCallable, Category = Cave)
+          void GenerateCave();
      
      //Initial density parameter (0 = no blocks at all, 1 = only blocks, no space)
      UPROPERTY(EditAnywhere, Category = Generation)
@@ -41,11 +47,9 @@ private:
      UPROPERTY(EditAnywhere, Category = Generation)
           int ResurrectsIfHasHigherNumberOfNeighboursThan = 12;
 
-     //Atomic block blueprint.
-     //UPROPERTY(EditAnywhere)
-     //     TArray<UClass*> AtomicBlock;
 
-     TArray<AActor*> cubes;
+private:
+
      //Global seed value, constant for an execution. 
      static int seed;
 
@@ -53,8 +57,6 @@ private:
      std::uniform_real_distribution<float> *distribution;
 
      //Generate maze
-     void Generate();
-     void Build();
      void Clear();
      void SeedRandom();
 
@@ -66,19 +68,6 @@ private:
      //Fill the boundaries with cubes, based on spawn probability
      void FillModelWithCubes();
 
-protected:
-     //Step of the algorithm
-     UFUNCTION(BlueprintCallable, Category = Generation)
-     void PerformGenerationStep();
-
-     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Cave)
-          TArray<bool> CaveArray;
-
-     UFUNCTION(BlueprintCallable, Category = Cave)
-          void GenerateCave();
-
-private:
-
      int CountNeighbours(int cell_index, bool count_neighbours);
 
      bool IsAlive(int cell_index);
@@ -86,12 +75,10 @@ private:
      void Kill(int cell_index);
 
      void Resurrect(int cell_index);
-     
-     //void CreateBlock(UClass *block_type, FVector location, int n_n);
 
 #pragma endregion Generation algorithm
 
-
+     int TotalSize;
 public:
      ACave();
      virtual void BeginPlay() override;
