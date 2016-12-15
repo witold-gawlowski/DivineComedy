@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "DivineComedy.h"
 #include "Runtime/Core/Public/GenericPlatform/GenericPlatformMath.h"
+#include "DivineComedy.h"
 #include "DivineCameraManager.h"
 #include <EngineGlobals.h>
 #include <Runtime/Engine/Classes/Engine/Engine.h>
@@ -65,8 +65,8 @@ void ADivineCameraManager::ProcessViewRotation (float DeltaTime, FRotator& OutVi
   //Calculate the rotation.
   FRotator NewOutViewRotation;
   FQuat OutQuat (OutViewRotation);
-  FQuat YawQuat (rotAxis, OutDeltaRot.Yaw / 100);
-  FQuat PitchQuat (FVector (0, 1, 0), -OutDeltaRot.Pitch / 100);
+  FQuat YawQuat (rotAxis, OutDeltaRot.Yaw*Sensitivity/10000);
+  FQuat PitchQuat (FVector (0, 1, 0), -OutDeltaRot.Pitch*Sensitivity/10000);
   FRotator result = FRotator (YawQuat*OutQuat*PitchQuat);
   //TODO: If a change from last frame is non-infinitesimal, don't do it.
   NewOutViewRotation = FRotator (result);
