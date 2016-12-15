@@ -20,6 +20,7 @@ void ADivineCameraManager::ProcessViewRotation (float DeltaTime, FRotator& OutVi
   if ( JumpFrame () ) {
     JumpOrientation = GetViewTargetPawn ()->GetActorForwardVector ();
     JumpOrientation.Z = 0;
+    JumpOrientation.Normalize ();
   }
 
   //if ( GetViewTargetPawn ()->GetMovementComponent ()->IsFalling () ) {
@@ -60,14 +61,6 @@ void ADivineCameraManager::ProcessViewRotation (float DeltaTime, FRotator& OutVi
     rotAxis = FVector (0, 0, 1);
   }
 
-  if ( DownFallCameraMode )
-  {
-    print (TEXT ("down camera mode"));
-  }
-  else
-  {
-    print (TEXT ("stand camera mode"));
-  }
 
   //Calculate the rotation.
   FRotator NewOutViewRotation;
