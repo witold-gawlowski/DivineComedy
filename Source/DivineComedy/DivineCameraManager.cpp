@@ -22,15 +22,15 @@ void ADivineCameraManager::ProcessViewRotation (float DeltaTime, FRotator& OutVi
     JumpOrientation.Z = 0;
   }
 
-  if ( GetViewTargetPawn ()->GetMovementComponent ()->IsFalling () ) {
-    print (TEXT ("falling"));
-  } else {
-    print (TEXT ("standing"));
-  }
+  //if ( GetViewTargetPawn ()->GetMovementComponent ()->IsFalling () ) {
+  //  print (TEXT ("falling"));
+  //} else {
+  //  print (TEXT ("standing"));
+  //}
 
   //Determine the camera mode
   float ViewLatitudeAngle = FMath::RadiansToDegrees (FGenericPlatformMath::Acos (FVector::DotProduct (OutViewRotation.Vector (), FVector (0, 0, -1))));
-  print (FString::Printf (TEXT ("down angle: %f"), ViewLatitudeAngle));
+  //print (FString::Printf (TEXT ("down angle: %f"), ViewLatitudeAngle));
   if ( DownFallCameraMode == false )
   {
     if (
@@ -42,8 +42,7 @@ void ADivineCameraManager::ProcessViewRotation (float DeltaTime, FRotator& OutVi
     }
   }
   else if (
-    GetViewTargetPawn ()->GetMovementComponent ()->IsFalling () == false ||
-    ViewLatitudeAngle > CameraModeTriggerAngleHigh
+    GetViewTargetPawn ()->GetMovementComponent ()->IsFalling () == false
     )
   {
     DownFallCameraMode = false;
@@ -61,6 +60,14 @@ void ADivineCameraManager::ProcessViewRotation (float DeltaTime, FRotator& OutVi
     rotAxis = FVector (0, 0, 1);
   }
 
+  if ( DownFallCameraMode )
+  {
+    print (TEXT ("down camera mode"));
+  }
+  else
+  {
+    print (TEXT ("stand camera mode"));
+  }
 
   //Calculate the rotation.
   FRotator NewOutViewRotation;
@@ -72,7 +79,8 @@ void ADivineCameraManager::ProcessViewRotation (float DeltaTime, FRotator& OutVi
   NewOutViewRotation = FRotator (result);
 
   //when in standing mode
-  if ( DownFallCameraMode == false ) {
+  if ( DownFallCameraMode == false )
+  {
     if ( NewOutViewRotation.Roll > RollToleranceMargin ) {
       NewOutViewRotation.Roll -= DeltaTime * RollRecoverySpeedParameter;
     } else if ( NewOutViewRotation.Roll < -RollToleranceMargin ) {
