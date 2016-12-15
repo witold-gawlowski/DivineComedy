@@ -24,10 +24,14 @@ public:
   //In degrees.
   UPROPERTY (EditAnywhere)
     float RollToleranceMargin = 2.0f;
-
+  
+  UPROPERTY (VisibleAnywhere)
+    bool DownFallCameraMode = true;
   FVector JumpOrientation;
 	
-	
-	
-	
+  UPROPERTY (EditAnywhere)
+    float CameraModeTriggerAngleLow = 15;
+
+  UPROPERTY (EditAnywhere)
+    float CameraModeTriggerAngleHigh = 65;
 };

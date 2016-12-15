@@ -1,9 +1,11 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
+#include "Runtime/Core/Public/GenericPlatform/GenericPlatformMath.h"
 #include "DivineComedy.h"
 #include "DivineCameraManager.h"
 #include <EngineGlobals.h>
 #include <Runtime/Engine/Classes/Engine/Engine.h>
+
 
 
 #define print(text) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 1.5, FColor::White,text);
@@ -26,36 +28,66 @@ void ADivineCameraManager::ProcessViewRotation (float DeltaTime, FRotator& OutVi
     print (TEXT ("standing"));
   }
 
+  //Determine the camera mode
+  float ViewLatitudeAngle = FMath::RadiansToDegrees (FGenericPlatformMath::Acos (FVector::DotProduct (OutViewRotation.Vector (), FVector (0, 0, -1))));
+  print (FString::Printf (TEXT ("down angle: %f"), ViewLatitudeAngle));
+  if ( DownFallCameraMode == false )
+  {
+    if (
+      GetViewTargetPawn ()->GetMovementComponent ()->IsFalling () &&
+      ViewLatitudeAngle < CameraModeTriggerAngleLow
+      )
+    {
+      DownFallCameraMode = true;
+    }
+  }
+  else if (
+    GetViewTargetPawn ()->GetMovementComponent ()->IsFalling () == false ||
+    ViewLatitudeAngle > CameraModeTriggerAngleHigh
+    )
+  {
+    DownFallCameraMode = false;
+  }
+
+
   //Calculate the pitch rotation axis.
-  float ZSpeedParam = FMath::Max (-GetViewTargetPawn ()->GetVelocity ().Z / PitchAxisMultiplier, 0.f);
-  if ( GetViewTargetPawn ()->GetMovementComponent ()->IsFalling () ) {
-    ZSpeedParam = 1000;
+  FVector rotAxis;
+  if ( DownFallCameraMode )
+  {
+    rotAxis = JumpOrientation;
   }
-  else {
-    ZSpeedParam = 0;
-  }
-  FVector rotAxis = JumpOrientation*ZSpeedParam;
-  if ( !GetViewTargetPawn ()->GetMovementComponent ()->IsFalling () ) {
+  else
+  {
     rotAxis = FVector (0, 0, 1);
   }
-  rotAxis.Normalize ();
+
 
   //Calculate the rotation.
+  FRotator NewOutViewRotation;
   FQuat OutQuat (OutViewRotation);
   FQuat YawQuat (rotAxis, OutDeltaRot.Yaw / 100);
   FQuat PitchQuat (FVector (0, 1, 0), -OutDeltaRot.Pitch / 100);
   FRotator result = FRotator (YawQuat*OutQuat*PitchQuat);
   //TODO: If a change from last frame is non-infinitesimal, don't do it.
-  OutViewRotation = FRotator (result);
+  NewOutViewRotation = FRotator (result);
 
-  //when standing, make view horizontal.
-  if ( !GetViewTargetPawn ()->GetMovementComponent ()->IsFalling () ) {
-    if ( OutViewRotation.Roll > RollToleranceMargin ) {
-      OutViewRotation.Roll -= DeltaTime * RollRecoverySpeedParameter;
-    } else if ( OutViewRotation.Roll < -RollToleranceMargin ) {
-      OutViewRotation.Roll += DeltaTime * RollRecoverySpeedParameter;
+  //when in standing mode
+  if ( DownFallCameraMode == false ) {
+    if ( NewOutViewRotation.Roll > RollToleranceMargin ) {
+      NewOutViewRotation.Roll -= DeltaTime * RollRecoverySpeedParameter;
+    } else if ( NewOutViewRotation.Roll < -RollToleranceMargin ) {
+      NewOutViewRotation.Roll += DeltaTime * RollRecoverySpeedParameter;
     }
   }
+
+  
+  
+  if ( DownFallCameraMode == false)
+  {
+    LimitViewPitch (NewOutViewRotation, -85, 85);
+  }
+
+   OutViewRotation = NewOutViewRotation;
 
 
   OutDeltaRot = FRotator::ZeroRotator;
