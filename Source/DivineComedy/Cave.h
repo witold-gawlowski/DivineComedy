@@ -33,6 +33,9 @@ protected:
 
      UFUNCTION(BlueprintCallable, Category = Cave)
           void GenerateCave();
+
+     UFUNCTION(BlueprintCallable, Category = Cave)
+          void FillHoles(bool Ceiling, bool Floor);
      
      //Initial density parameter (0 = no blocks at all, 1 = only blocks, no space)
      UPROPERTY(EditAnywhere, Category = Generation)
