@@ -33,7 +33,7 @@ public:
     float CameraModeTriggerAngleLow = 15;
 
   UPROPERTY (EditAnywhere)
-    float CameraModeTriggerAngleHigh = 65;
+    float CameraModeTriggerAngleHigh = 90;
 
   UPROPERTY (EditAnywhere)
     float Sensitivity = 100;
