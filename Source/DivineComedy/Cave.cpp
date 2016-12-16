@@ -162,6 +162,24 @@ void ACave::GenerateCave()
      }
 }
 
+void ACave::FillHoles(bool Ceiling, bool Floor)
+{
+     for (int i = 0; i < TotalSize; i++)
+     {
+          int z = i%NumBlocsZGen;
+          if (Ceiling && z == 0 && !CaveArray[i])
+          {
+               CaveArray[i] = true;
+          }
+
+          if (Floor && z == NumBlocsZGen - 1 && !CaveArray[i])
+          {
+               CaveArray[i] = true;
+          }
+
+     }
+}
+
 void ACave::Clear()
 {
      CaveArray.Empty();
