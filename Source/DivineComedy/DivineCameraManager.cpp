@@ -76,13 +76,13 @@ void ADivineCameraManager::ProcessViewRotation (float DeltaTime, FRotator& OutVi
   if ( DownFallCameraMode == false )
   {
     if ( NewOutViewRotation.Roll > RollToleranceMargin ) {
-      NewOutViewRotation.Roll -= DeltaTime * RollRecoverySpeedParameter*NewOutViewRotation.Roll;
+      NewOutViewRotation.Roll -= DeltaTime * RollRecoverySpeedParameter*FMath::Abs(NewOutViewRotation.Roll);
     } else if ( NewOutViewRotation.Roll < -RollToleranceMargin ) {
-      NewOutViewRotation.Roll += DeltaTime * RollRecoverySpeedParameter*NewOutViewRotation.Roll;
+      NewOutViewRotation.Roll += DeltaTime * RollRecoverySpeedParameter*FMath::Abs (NewOutViewRotation.Roll);
     }
   }
 
-  
+  print (FString::Printf (TEXT("Roll: %f"), NewOutViewRotation.Roll));
   
   if ( DownFallCameraMode == false)
   {
