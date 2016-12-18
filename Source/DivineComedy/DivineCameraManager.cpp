@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "Runtime/Core/Public/GenericPlatform/GenericPlatformMath.h"
 #include "DivineComedy.h"
+#include "Runtime/Core/Public/GenericPlatform/GenericPlatformMath.h"
 #include "DivineCameraManager.h"
 #include <EngineGlobals.h>
 #include <Runtime/Engine/Classes/Engine/Engine.h>
@@ -20,17 +20,18 @@ void ADivineCameraManager::ProcessViewRotation (float DeltaTime, FRotator& OutVi
   if ( JumpFrame () ) {
     JumpOrientation = GetViewTargetPawn ()->GetActorForwardVector ();
     JumpOrientation.Z = 0;
+    JumpOrientation.Normalize ();
   }
 
-  if ( GetViewTargetPawn ()->GetMovementComponent ()->IsFalling () ) {
-    print (TEXT ("falling"));
-  } else {
-    print (TEXT ("standing"));
-  }
+  //if ( GetViewTargetPawn ()->GetMovementComponent ()->IsFalling () ) {
+  //  print (TEXT ("falling"));
+  //} else {
+  //  print (TEXT ("standing"));
+  //}
 
   //Determine the camera mode
   float ViewLatitudeAngle = FMath::RadiansToDegrees (FGenericPlatformMath::Acos (FVector::DotProduct (OutViewRotation.Vector (), FVector (0, 0, -1))));
-  print (FString::Printf (TEXT ("down angle: %f"), ViewLatitudeAngle));
+  //print (FString::Printf (TEXT ("down angle: %f"), ViewLatitudeAngle));
   if ( DownFallCameraMode == false )
   {
     if (
@@ -72,11 +73,12 @@ void ADivineCameraManager::ProcessViewRotation (float DeltaTime, FRotator& OutVi
   NewOutViewRotation = FRotator (result);
 
   //when in standing mode
-  if ( DownFallCameraMode == false ) {
+  if ( DownFallCameraMode == false )
+  {
     if ( NewOutViewRotation.Roll > RollToleranceMargin ) {
-      NewOutViewRotation.Roll -= DeltaTime * RollRecoverySpeedParameter;
+      NewOutViewRotation.Roll -= DeltaTime * RollRecoverySpeedParameter*NewOutViewRotation.Roll;
     } else if ( NewOutViewRotation.Roll < -RollToleranceMargin ) {
-      NewOutViewRotation.Roll += DeltaTime * RollRecoverySpeedParameter;
+      NewOutViewRotation.Roll += DeltaTime * RollRecoverySpeedParameter*NewOutViewRotation.Roll;
     }
   }
 
